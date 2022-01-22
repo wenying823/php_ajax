@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <title>shopweb</title>
+    <script>
+        $(document).ready(function(){
+            $.ajax({
+                method:'post',
+                data:{'store_name':'all'},
+                url:"train6-shopweb.php",
+                dataType: "json",
+                success: function(data){
+                    for(i=0; i<data['item_data'].length; i++){
+                        $("#items_row").append(
+							"<tr>"+
+							"<td>"+data['item_data'][i].items_name+"</td>"+
+							"<td>"+data['item_data'][i].items_price+"</td>"+
+							"<td>"+data['item_data'][i].store_name+"</td>"+
+							"<td><button type='submit' class='btn btn-success' name='buy' value='"+data['item_data'][i].items_no+"'><span class='glyphicon glyphicon-shopping-cart'></span>購買</td>"+
+							"<td><button class='btn btn-danger' name='delete' onclick='item_delete("+data['item_data'][i].items_no+")''>刪除</td>"+
+							"</tr>"
+                        )
+                    }
+                    for(i=0; i<data['store_data'].length; i++){
+                        $("#item_store_select").append(
+                            "<option value='"+data['store_data'][i].store_name_list+"'>"+data['store_data'][i].store_name_list+"</option>"
+                        )
+                    }
+
+                }
+            });
+        });
+        //商店篩選
+        function item_store_change(){
+            var select_store_name = $('#item_store_select').val();
+            $.ajax({
+                method:'post',
+                data:{'store_name':select_store_name},
+                url:"train6-shopweb.php",
+                dataType: "json",
+                success: function(data){
+                    $("#items_row").empty();
+                    for(i=0; i<data['item_data'].length; i++){
+                        $("#items_row").append(
+							"<tr>"+
+							"<td>"+data['item_data'][i].items_name+"</td>"+
+							"<td>"+data['item_data'][i].items_price+"</td>"+
+							"<td>"+data['item_data'][i].store_name+"</td>"+
+							"<td><button type='submit' class='btn btn-success' name='buy' value='"+data['item_data'][i].items_no+"'><span class='glyphicon glyphicon-shopping-cart'></span>購買</td>"+
+							"<td><button class='btn btn-danger' name='delete' onclick='item_delete("+data['item_data'][i].items_no+")''>刪除</td>"+
+							"</tr>"
+                        )
+                    }
+                }
+            });
+        }
+        //商品刪除
+        function item_delete(value){
+            var delete_no = value;
+            $.ajax({
+                method:'post',
+                data:{'delete_no':delete_no},
+                url:"train6-shopweb.php",
+                dataType: "json",
+                success: function(data){
+                    alert(data);
+                    item_store_change();
+                }
+            })
+        }
+        function items_insert(){
+            var item_name = $('#item_name').val();
+            var item_price = $('#item_price').val();
+            $.ajax({
+                method:'post',
+                data:{'item_name':item_name, 'item_price':item_price},
+                url:"train6-shopweb.php",
+                dataType: "json",
+                success: function(data){
+                    alert(data);
+                    location.reload();
+                }
+            })
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>歡迎來到商店街</h2>
+        <select id="item_store_select" onchange="item_store_change()">
+            <option value="all">商店列表</option>
+        </select>
+        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal">新增資料</button>
+        <h3>商品列表</h3>
+        
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th width="30%">產品</th>
+                    <th width="20%">售價</th>
+                    <th width="30%">店家名稱</th>
+                    <th width="10%">購買</th>
+                    <th width="10%">刪除</th>
+                </tr>
+            </thead>
+            <tbody id="items_row">
+                
+            </tbody>
+        </table>
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">新增商品</h4>
+                    </div>
+                    <div class="modal-body" style="height:300px">
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="item_name">產品名稱:</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="item_name" placeholder="請輸入產品名稱" name="item_name">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="item_price">單價:</label>
+                            <div class="col-sm-10">          
+                                <input type="text" class="form-control" id="item_price" placeholder="單價" name="item_price" onkeyup="value=value.replace(/^(0+)|[^\d]+/g,'')">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success" name="item_insert" onclick="items_insert()">新增</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>
